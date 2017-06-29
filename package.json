@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "The API takes a location and returns pictures and their data that were taken near the input location. It will also allow the user to store their favorite pictures, and add comments and ratings.",
   "apidoc": {
-    "title": "ShareCast",
-    "url": "https://sharecast.com"
+    "title": "PlaceMe",
+    "url": "https://PlaceMe.com"
   },
   "main": "index.js",
   "scripts": {
