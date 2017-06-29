@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 define({  "title": "PlaceMe",  "url": "https://PlaceMe.com",  "name": "place-me",  "version": "1.0.0",  "description": "The API takes a location and returns pictures and their data that were taken near the input location. It will also allow the user to store their favorite pictures, and add comments and ratings.",  "sampleUrl": false,  "defaultVersion": "0.0.0",  "apidoc": "0.3.0",  "generator": {    "name": "apidoc",    "time": "2017-06-29T18:56:28.629Z",    "url": "http://apidocjs.com",    "version": "0.17.6"  }});
+=======
+define({  "title": "ShareCast",  "url": "https://sharecast.com",  "name": "place-me",  "version": "1.0.0",  "description": "The API takes a location and returns pictures and their data that were taken near the input location. It will also allow the user to store their favorite pictures, and add comments and ratings.",  "sampleUrl": false,  "defaultVersion": "0.0.0",  "apidoc": "0.3.0",  "generator": {    "name": "apidoc",    "time": "2017-06-29T18:58:25.676Z",    "url": "http://apidocjs.com",    "version": "0.17.6"  }});
+>>>>>>> 71760ba97c7792381c731ec448692eceaa9c07c8
