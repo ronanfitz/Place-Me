@@ -1,0 +1,46 @@
+{
+  "name": "place-me",
+  "version": "1.0.0",
+  "description": "The API takes a location and returns pictures and their data that were taken near the input location. It will also allow the user to store their favorite pictures, and add comments and ratings.",
+  "apidoc": {
+    "title": "ShareCast",
+    "url": "https://sharecast.com"
+  },
+  "main": "index.js",
+  "scripts": {
+    "setupTestEnv": "knex migrate:rollback --env test && knex migrate:latest --env test && knex seed:run --env test",
+    "dev": "nodemon index.js",
+    "coverage": "NODE_ENV=test npm run setupTestEnv && istanbul cover _mocha -- -R spec",
+    "test": "npm run setupTestEnv && mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylerlan/Place-Me.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tylerlan/Place-Me/issues"
+  },
+  "homepage": "https://github.com/tylerlan/Place-Me#readme",
+  "dependencies": {
+    "bcrypt": "^1.0.2",
+    "body-parser": "^1.17.2",
+    "cookie-parser": "^1.4.3",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.3",
+    "jsonwebtoken": "^7.4.1",
+    "knex": "^0.13.0",
+    "pg": "^6.4.0",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "apidoc": "^0.17.6"
+  },
+  "devDependencies": {
+    "chai": "^4.0.2",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.4.2",
+    "nodemon": "^1.11.0",
+    "supertest": "^1.2.0"
+  }
+}
