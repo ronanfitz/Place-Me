@@ -39,23 +39,32 @@ class UserController {
     });
   }
 
-  getPassword(id) {
-    return knex("users").where("user_id", id).then(users => {
-      return user.hashed_password;
-    });
-  }
-
   updateUser(id, changes) {
-    return knex("users")
-      .where("user_id", id)
-      .update(changes, ["user_id", "username"]);
+    return knex("users").where("user_id", id).update(changes, ["user_id", "username"]);
   }
 
   deleteUser(id) {
     return knex("users").del().where("user_id", id);
   }
-}
 
-//NEED TO WRITE UNIT TESTS
+  updateUsername(res, username, searchedId) {
+    this.getByUsername(username)
+      .then(result => {
+        if (result.length) {
+          return res.status(403).send("Username must be unique");
+        }
+        let changes = { username: username };
+        return changes;
+      })
+      .then(changes => {
+        this.updateUser(searchedId, changes).then(result => {
+          return res.status(200).json(result);
+        });
+      })
+      .catch(err => {
+        next(err);
+      });
+  }
+}
 
 module.exports = UserController;

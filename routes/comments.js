@@ -17,6 +17,7 @@ let commentController = new CommentController();
 
 /**
  * @api {get} /comments/:user_id GET user comments
+ * @apiPermission readwrite
  * @apiVersion 1.0.0
  * @apiGroup Comments
  * @apiSuccess {Object[]} comments Comments of the user.
@@ -37,7 +38,7 @@ let commentController = new CommentController();
  *     }
  */
 
-router.get("/comments/:user_id", verifyToken, (req, res) => {
+router.get("/comments/:user_id", verifyToken, (req, res, next) => {
   let user_id = req.params.user_id;
   let allUsersComments = commentController.getAllUsersComments(user_id);
 
@@ -49,13 +50,13 @@ router.get("/comments/:user_id", verifyToken, (req, res) => {
       res.status(200).json(usersComments);
     })
     .catch(err => {
-      console.log("ERROR:", err);
-      res.sendStatus(500);
+      next(err);
     });
 });
 
 /**
  * @api {get} /comments/:user_id/:picture_id GET user comment on a picture
+ * @apiPermission readwrite
  * @apiVersion 1.0.0
  * @apiGroup Comments
  * @apiSuccess {Object[]} comment User comment on a picture.
@@ -82,7 +83,7 @@ router.get("/comments/:user_id", verifyToken, (req, res) => {
  *     }
  */
 
-router.get("/comments/:user_id/:picture_id", verifyToken, (req, res) => {
+router.get("/comments/:user_id/:picture_id", verifyToken, (req, res, next) => {
   let user_id = req.params.user_id;
   let picture_id = req.params.picture_id;
   let allUsersComments = commentController.getAllUsersComments(user_id);
@@ -105,13 +106,13 @@ router.get("/comments/:user_id/:picture_id", verifyToken, (req, res) => {
       }
     })
     .catch(err => {
-      console.log("ERROR:", err);
-      res.sendStatus(500);
+      next(err);
     });
 });
 
 /**
  * @api {post} /comments/:user_id POST comment
+ * @apiPermission readwrite
  * @apiVersion 1.0.0
  * @apiGroup Comments
  * @apiSuccess {Object[]} comment Comment posted by the user.
@@ -137,7 +138,7 @@ router.get("/comments/:user_id/:picture_id", verifyToken, (req, res) => {
  *     }
  */
 
-router.post("/comments/:user_id", verifyToken, (req, res) => {
+router.post("/comments/:user_id", verifyToken, (req, res, next) => {
   let user_id = req.params.user_id;
   let commentObj = req.body;
   commentObj.user_id = user_id;
@@ -163,24 +164,22 @@ router.post("/comments/:user_id", verifyToken, (req, res) => {
                 return;
               })
               .catch(err => {
-                console.log("ERROR:", err);
-                res.sendStatus(500);
+                next(err);
               });
           }
         })
         .catch(err => {
-          console.log("ERROR:", err);
-          res.sendStatus(500);
+          next(err);
         });
     })
     .catch(err => {
-      console.log("ERROR:", err);
-      res.sendStatus(500);
+      next(err);
     });
 });
 
 /**
  * @api {delete} /comments/:user_id/:picture_id DELETE comment
+ * @apiPermission readwrite
  * @apiVersion 1.0.0
  * @apiGroup Comments
  * @apiSuccess {Object[]} comment Deleted comment.
@@ -213,38 +212,42 @@ router.post("/comments/:user_id", verifyToken, (req, res) => {
  *     }
  */
 
-router.delete("/comments/:user_id/:picture_id", verifyToken, (req, res) => {
+router.delete("/comments/:user_id/:picture_id", verifyToken, (req, res, next) => {
   let user_id = req.params.user_id;
   let picture_id = req.params.picture_id;
   let commentToDelete = commentController.getCommentByIds(user_id, picture_id);
   let checkForPicture = commentController.checkForPicture(picture_id);
   let checkForUser = commentController.checkForUser(user_id);
 
-  checkForUser.then(user => {
-    if (user.length === 0) {
-      res.status(404).send("User not found");
-      return;
-    } else {
-      checkForPicture.then(picture => {
-        if (picture.length === 0) {
-          res.status(404).send("Picture not found");
-          return;
-        } else {
-          commentToDelete.then(comment => {
-            if (comment.length === 0) {
-              res.status(404).send("Comment not found");
-              return;
-            } else {
-              commentController.deleteComment(user_id, picture_id).then(result => {
-                res.status(200).json(comment);
+  checkForUser
+    .then(user => {
+      if (user.length === 0) {
+        res.status(404).send("User not found");
+        return;
+      } else {
+        checkForPicture.then(picture => {
+          if (picture.length === 0) {
+            res.status(404).send("Picture not found");
+            return;
+          } else {
+            commentToDelete.then(comment => {
+              if (comment.length === 0) {
+                res.status(404).send("Comment not found");
                 return;
-              });
-            }
-          });
-        }
-      });
-    }
-  });
+              } else {
+                commentController.deleteComment(user_id, picture_id).then(result => {
+                  res.status(200).json(comment);
+                  return;
+                });
+              }
+            });
+          }
+        });
+      }
+    })
+    .catch(err => {
+      next(err);
+    });
 });
 
 module.exports = router;

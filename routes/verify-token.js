@@ -14,8 +14,7 @@ function verifyToken(req, res, next) {
       next();
     });
   } else {
-    console.log("TOKEN NOT FOUND");
-    return res.sendStatus(404);
+    return res.status(404).send("Must be a registered user");
   }
 }
 
