@@ -55,6 +55,19 @@ suite("users route", () => {
           });
       });
   });
+
+  test("POST /signup 'username already exists'", done => {
+    request(server)
+      .post("/signup")
+      .set("Accept", "application/json")
+      .set("Content-Type", "application/json")
+      .send({
+        username: "Tyler",
+        password
+      })
+      .expect(400, "Username already exists", done);
+  });
+
   test("POST /login", done => {
     request(server)
       .post("/login")
@@ -72,6 +85,30 @@ suite("users route", () => {
       })
       .expect("Content-Type", /json/)
       .end(done);
+  });
+
+  test("POST /login 'bad password'", done => {
+    request(server)
+      .post("/login")
+      .set("Accept", "application/json")
+      .set("Content-Type", "application/json")
+      .send({
+        username: "John",
+        password: "password"
+      })
+      .expect(400, "Bad username or password", done);
+  });
+
+  test("POST /login 'bad username'", done => {
+    request(server)
+      .post("/login")
+      .set("Accept", "application/json")
+      .set("Content-Type", "application/json")
+      .send({
+        username: "Voldemort",
+        password
+      })
+      .expect(400, "Bad username or password", done);
   });
 
   test("GET /users", done => {
@@ -116,6 +153,14 @@ suite("users route", () => {
       });
   });
 
+  test("No token, no service", done => {
+    request(server)
+      .get("/users")
+      .set("Accept", "application/json")
+      .set("Content-Type", "application/json")
+      .expect(404, "Must be a registered user", done);
+  });
+
   test("GET /users/:user_id", done => {
     request(server)
       .post("/login")
@@ -146,7 +191,28 @@ suite("users route", () => {
       });
   });
 
-  test("PUT /users/:user_id username", done => {
+  test("GET /users/:user_id 'cannot get use who does not exist'", done => {
+    request(server)
+      .post("/login")
+      .set("Accept", "application/json")
+      .set("Content-Type", "application/json")
+      .send({
+        username: "John",
+        password
+      })
+      .end((err, res) => {
+        if (err) return done(err);
+
+        agent
+          .get("/users/30")
+          .set("Accept", "application/json")
+          .set("Content-Type", "application/json")
+          .set("Cookie", res.headers["set-cookie"])
+          .expect(404, "User at 30 not found", done);
+      });
+  });
+
+  test("PUT /users/:user_id 'change username'", done => {
     request(server)
       .post("/login")
       .set("Accept", "application/json")
@@ -177,6 +243,28 @@ suite("users route", () => {
       });
   });
 
+  // test("PUT /users/:user_id 'username must be unique'", done => {
+  //   request(server)
+  //     .post("/login")
+  //     .set("Accept", "application/json")
+  //     .set("Content-Type", "application/json")
+  //     .send({
+  //       username: "John",
+  //       password
+  //     })
+  //     .end((err, res) => {
+  //       if (err) return done(err);
+  //
+  //       agent
+  //         .put("/users/4")
+  //         .send({ username: "Ronan" })
+  //         .set("Accept", "application/json")
+  //         .set("Content-Type", "application/json")
+  //         .set("Cookie", res.headers["set-cookie"])
+  //         .expect(403, "Username must be unique", done);
+  //     });
+  // });
+
   test("DELETE /users/:user_id", done => {
     request(server)
       .post("/login")
@@ -202,6 +290,27 @@ suite("users route", () => {
             },
             done
           );
+      });
+  });
+
+  test("DELETE /users/:user_id 'cannot delete user who does not exist'", done => {
+    request(server)
+      .post("/login")
+      .set("Accept", "application/json")
+      .set("Content-Type", "application/json")
+      .send({
+        username: "John",
+        password
+      })
+      .end((err, res) => {
+        if (err) return done(err);
+
+        agent
+          .del("/users/20")
+          .set("Accept", "application/json")
+          .set("Content-Type", "application/json")
+          .set("Cookie", res.headers["set-cookie"])
+          .expect(404, "User at 20 not found", done);
       });
   });
 });

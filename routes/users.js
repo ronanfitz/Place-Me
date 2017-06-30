@@ -17,6 +17,7 @@ let userController = new UserController();
 
 /**
  * @api {post} /signup POST signup
+ * @apiPermission none
  * @apiVersion 1.0.0
  * @apiGroup Users
  * @apiSuccess {String} username Returns the username of the User.
@@ -36,12 +37,12 @@ let userController = new UserController();
  *     }
  */
 
-router.post("/signup", (req, res) => {
+router.post("/signup", (req, res, next) => {
   let username = req.body.username;
   let password = req.body.password;
 
   userController.getByUsername(username).then(result => {
-    if (result.legnth) {
+    if (result.length) {
       return res.status(400).send("Username already exists");
     }
     userController
@@ -58,14 +59,14 @@ router.post("/signup", (req, res) => {
         res.status(201).json(newEntry);
       })
       .catch(err => {
-        console.log("ERROR:", err);
-        res.sendStatus(500);
+        next(err);
       });
   });
 });
 
 /**
  * @api {post} /login POST login
+ * @apiPermission none
  * @apiVersion 1.0.0
  * @apiGroup Users
  * @apiSuccess {String} payload  Returns the user login info.
@@ -84,14 +85,14 @@ router.post("/signup", (req, res) => {
  *     }
  */
 
-router.post("/login", (req, res) => {
+router.post("/login", (req, res, next) => {
   let username = req.body.username;
   let password = req.body.password;
 
   userController
     .getByUsername(username)
     .then(result => {
-      if (!result) {
+      if (!result.length) {
         return res.status(400).send("Bad username or password");
       }
       const userData = result[0];
@@ -113,13 +114,13 @@ router.post("/login", (req, res) => {
       });
     })
     .catch(err => {
-      console.log("ERROR:", err);
-      res.sendStatus(500);
+      next(err);
     });
 });
 
 /**
  * @api {get} /users GET users
+ * @apiPermission readwrite
  * @apiVersion 1.0.0
  * @apiGroup Users
  * @apiSuccess {String} users Returns all users.
@@ -133,20 +134,20 @@ router.post("/login", (req, res) => {
  *     }
  */
 
-router.get("/users", verifyToken, (req, res) => {
+router.get("/users", verifyToken, (req, res, next) => {
   let allUsers = userController.getAllUsers();
   allUsers
     .then(result => {
       return res.status(200).json(result);
     })
     .catch(err => {
-      console.log("ERROR:", err);
-      res.sendStatus(500);
+      next(err);
     });
 });
 
 /**
  * @api {get} /users/:user_id GET user
+ * @apiPermission readwrite
  * @apiVersion 1.0.0
  * @apiGroup Users
  * @apiSuccess {String} user  Returns a single user.
@@ -164,25 +165,25 @@ router.get("/users", verifyToken, (req, res) => {
  *     }
  */
 
-router.get("/users/:user_id", verifyToken, (req, res) => {
+router.get("/users/:user_id", verifyToken, (req, res, next) => {
   let searchedId = req.params.user_id;
   let singleUser = userController.getById(searchedId);
 
   singleUser
     .then(result => {
-      if (!result) {
+      if (!result.length) {
         return res.status(404).send(`User at ${searchedId} not found`);
       }
       return res.status(200).json(result);
     })
     .catch(err => {
-      console.log("ERROR:", err);
-      res.sendStatus(500);
+      next(err);
     });
 });
 
 /**
  * @api {put} /users/:user_id UPDATE user
+ * @apiPermission readwrite
  * @apiVersion 1.0.0
  * @apiGroup Users
  * @apiSuccess {String} user  Returns the updated user.
@@ -202,41 +203,17 @@ router.get("/users/:user_id", verifyToken, (req, res) => {
 
 router.put("/users/:user_id", verifyToken, (req, res) => {
   let searchedId = req.params.user_id;
-  let { username, currentPassword, newPassword } = req.body; // User has to KNOW, and manually input their current plaintext password...and also enter a plaintext new password
+  let { username, currentPassword, newPassword } = req.body;
 
   if (username) {
-    updateUsername(res, username, searchedId);
+    userController.updateUsername(res, username, searchedId);
   }
-
-  // if (currentPassword && newPassword) {
-  //   userController
-  //     .getPassword(searchedId)
-  //     .then(results => {
-  //       if (results.length) {
-  //         bcrypt.compare(currentPassword, results[0].hashed_password).then(result => {
-  //           if (!result) return res.status(401).send("Incorrect password");
-  //           bcrypt.hash(newPassword, 10).then(newHashedPassword => {
-  //             changes["hashed_password"] = newHashedPassword;
-  //             return;
-  //           });
-  //         });
-  //       }
-  //     })
-  //     .catch(err => {
-  //       console.log("ERROR:", err);
-  //       res.sendStatus(500);
-  //     });
-  // }
-  //
-  // console.log("CHANGES", changes);
-  //
-  // userController.updateUser(searchedId, changes).then(result => {
-  //   return res.status(200).json(result);
-  // });
+  return;
 });
 
 /**
  * @api {delete} /users/:user_id DELETE user
+ * @apiPermission readwrite
  * @apiVersion 1.0.0
  * @apiGroup Users
  * @apiSuccess {String} user  Returns the deleted user.
@@ -254,14 +231,14 @@ router.put("/users/:user_id", verifyToken, (req, res) => {
  *     }
  */
 
-router.delete("/users/:user_id", verifyToken, (req, res) => {
+router.delete("/users/:user_id", verifyToken, (req, res, next) => {
   let searchedId = req.params.user_id;
   let deletedUser;
 
   userController
     .getById(searchedId)
     .then(user => {
-      if (!user) {
+      if (!user.length) {
         return res.status(404).send(`User at ${searchedId} not found`);
       }
       deletedUser = user[0];
@@ -271,39 +248,8 @@ router.delete("/users/:user_id", verifyToken, (req, res) => {
       res.send(deletedUser);
     })
     .catch(err => {
-      console.log("ERROR:", err);
-      res.sendStatus(500);
+      next(err);
     });
 });
-//
-//
-//
-//
-//
-//
-//
-//
-//
-function updateUsername(res, username, searchedId) {
-  userController
-    .getByUsername(username)
-    .then(result => {
-      if (result.length) {
-        return res.status(403).send("Username must be unique");
-      }
-      let changes = { username: username };
-      return changes;
-    })
-    .then(changes => {
-      userController.updateUser(searchedId, changes).then(result => {
-        return res.status(200).json(result);
-      });
-    })
-    .catch(err => {
-      console.log("ERROR:", err);
-      res.sendStatus(500);
-    });
-}
-//
 
 module.exports = router;

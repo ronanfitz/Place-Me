@@ -11,6 +11,7 @@ let searchController = new SearchController();
 
 /**
  * @api {get} /search GET Pictures request from API
+ * @apiPermission none
  * @apiVersion 1.0.0
  * @apiGroup Search
  * @apiSuccess {Object[]} pictures Returns array of picture objects.
@@ -33,13 +34,20 @@ let searchController = new SearchController();
 router.get("/search", (req, res) => {
   let lat = req.query.lat;
   let lon = req.query.lon;
+  let reg = new RegExp(/^-?((1?[0-7]?|[0-9]?)[0-9]|180).[0-9]{1,6}$/);
 
   if (lon === "undefined" || lat === "undefined" || !lon || !lat) {
     return res
       .status(400)
       .set("Content-Type", "text/plain")
       .send("Search requires both lat and lon");
+  } else if (!reg.exec(lat) || !reg.exec(lon)) {
+    return res
+      .status(400)
+      .set("Content-Type", "text/plain")
+      .send("Search requires valid coordinates");
   }
+
   let pictureData = searchController.getPictureData(lat, lon);
 
   pictureData

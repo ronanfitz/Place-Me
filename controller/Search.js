@@ -12,23 +12,20 @@ class SearchController {
     this.format = "json";
     this.imageSize = "c"; // 'c' is medium 800, 800 on longest side
   }
+
   getPictureData(lat, lon) {
     const SEARCH = `https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=${this
       .API_KEY}&safe_search=1&has_geo=true&lat=${lat}&lon=${lon}&radius=${this
       .radius}&accuracy=${this.accuracy}&sort=${this.imageSort}&per_page=${this
       .imagesLoaded}&format=${this.format}&nojsoncallback=1`;
 
-    return rp(SEARCH)
-      .then(data => {
-        let parsed = JSON.parse(data);
-        let arrayOfPictureDataObjects = parsed.photos.photo;
-        return arrayOfPictureDataObjects;
-      })
-      .catch(apiErr => {
-        console.log("SEARCH CALL FAILED", apiErr);
-        return;
-      });
+    return rp(SEARCH).then(data => {
+      let parsed = JSON.parse(data);
+      let arrayOfPictureDataObjects = parsed.photos.photo;
+      return arrayOfPictureDataObjects;
+    });
   }
+
   generateObjects(picArray, lat, lon) {
     let justTheEssentials = picArray.map(pic => {
       let essentials = {};
@@ -58,7 +55,5 @@ class SearchController {
   //     });
   // }
 }
-
-//NEED TO WRITE UNIT TESTS
 
 module.exports = SearchController;

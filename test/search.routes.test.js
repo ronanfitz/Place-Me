@@ -87,7 +87,7 @@ suite("search routes", () => {
       .get(`/search?lat=${lat}&lon=${lon}`)
       .set("Accept", "application/json")
       .set("Content-Type", "application/json")
-      .expect(500, done);
+      .expect(400, "Search requires valid coordinates", done);
   });
 
   test("GET /search?lat&lon 'lon undefined'", done => {
@@ -96,6 +96,7 @@ suite("search routes", () => {
     request(server)
       .get(`/search?lat=${lat}&lon=${lon}`)
       .set("Accept", "application/json")
+      .set("Content-Type", "application/json")
       .expect("Content-Type", /plain/)
       .expect(400, "Search requires both lat and lon", done);
   });
